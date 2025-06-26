@@ -3,14 +3,31 @@ const User = require('../models/userModel');
 const router = express.Router();
 
 //auth login
-router.get('/login/check', async(req, res) => {
-    const data = await User.findOne({_id:req.user.userId}).select('-blogs -password')
+// router.get('/login/check', async(req, res) => {
+//     const data = await User.findOne({_id:req.user.userId}).select('-blogs -password')
 
-    const baseUrl = `${req.protocol}://${req.get('host')}`;
+//     const baseUrl = `${req.protocol}://${req.get('host')}`;
 
-    const user = {...data._doc, avatar: `${baseUrl}/uploads/userAvatar/${data.avatar}`}
+//     const user = {...data._doc, avatar: `${baseUrl}/uploads/userAvatar/${data.avatar}`}
 
-    res.json({ authenticated: true, user});
+//     res.json({ authenticated: true, user});
+// });
+
+router.get('/login/check', checkLogin, async (req, res) => {
+    try {
+        const data = await User.findById(req.user.userId).select('-blogs -password');
+        if (!data) {
+            return res.status(404).json({ authenticated: false, message: "User not found" });
+        }
+
+        const baseUrl = `${req.protocol}://${req.get('host')}`;
+        const user = { ...data._doc, avatar: `${baseUrl}/uploads/userAvatar/${data.avatar}` };
+
+        res.json({ authenticated: true, user });
+    } catch (err) {
+        console.error('Error in /login/check:', err.message);
+        res.status(500).json({ authenticated: false, message: "Internal server error" });
+    }
 });
 
 //auth logout
