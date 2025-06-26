@@ -148,7 +148,7 @@ const getLogin = async (req, res, next) => {
       httpOnly: true, // Accessible only by the web server
       signed: true, // Enable signing
       secure: true, //sent only over https
-      sameSite:'None' //none for cors
+      sameSite:'None' //none for cors ok
     });
 
     const io = req.app.get('io');
