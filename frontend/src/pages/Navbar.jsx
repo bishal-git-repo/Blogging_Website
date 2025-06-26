@@ -58,11 +58,11 @@ function Navbar() {
               Blogs
             </NavLink>
           </li>
-          <li>
+          {/* <li>
             <NavLink to="/social" className={({ isActive }) => (isActive ? 'text-black text-lg' : 'hover:text-blue-400 text-base')}>
               Social
             </NavLink>
-          </li>
+          </li> */}
         </div>
 
         <li ref={dropdownRef} className="relative pl-4">
