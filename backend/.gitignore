@@ -1,0 +1,73 @@
+# Node.js dependencies
+node_modules/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# Build directories
+dist/
+build/
+tmp/
+temp/
+
+# Coverage reports
+coverage/
+.nyc_output/
+
+# TypeScript
+*.tsbuildinfo
+
+# PM2 logs and config
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# Debug files
+*.log
+*.gz
+
+# VS Code settings
+.vscode/
+.history/
+
+# Docker
+docker-compose.override.yml
+.docker/
+
+# Optional: Prisma ORM
+prisma/migrations/
+*.sqlite
+
+# Optional: Sequelize ORM
+migrations/
+seeders/
+
+# Optional: local databases
+*.db
+*.sqlite
+
+# Optional: test output
+test-output/
+jest-*
+
+# Ignore compiled JavaScript from TypeScript
+*.js.map
+
+# Ignore Redis dump
+dump.rdb
