@@ -148,6 +148,7 @@ const getLogin = async (req, res, next) => {
       httpOnly: true, // Accessible only by the web server
       signed: true, // Enable signing
       secure: true, //sent only over https
+      sameSite:'None'
     });
 
     const io = req.app.get('io');
