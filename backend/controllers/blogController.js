@@ -68,7 +68,7 @@ const addBlogHandler = async (req, res) => {
 const editBlogHandler = async (req, res) => {
   try {
     const blogId = req.params.id;
-    const { title, description } = req.body; // Expect image as a URL string
+    const { title, description } = req.body;
 
     // Validation
     if (!title || !description) {
@@ -81,29 +81,29 @@ const editBlogHandler = async (req, res) => {
       throw createError(404, "Blog not found");
     }
 
-    // Check if the user is not the author of the blog
+    // Authorization check
     if (blog.author.toString() !== req.user.userId) {
       throw createError(403, "You are not authorized to edit this blog");
     }
-    let upload;
 
+    let uploadResult = null;
+
+    // If a new image is uploaded, handle it
     if (req.files && req.files[0] && req.files[0].path) {
-      // Upload new image to Cloudinary
-      upload = await cloudinary.uploader.upload(req.files[0].path);
+      uploadResult = await cloudinary.uploader.upload(req.files[0].path);
 
-      if (upload.secure_url) {
-        // Delete old image from Cloudinary
-        if (blog.imagePublicId) {
-          await cloudinary.uploader.destroy(blog.imagePublicId);
-        }
+      // If upload succeeded and blog had an old image, delete it
+      if (uploadResult?.secure_url && blog.imagePublicId) {
+        await cloudinary.uploader.destroy(blog.imagePublicId);
       }
     }
 
-    // If image URL is provided, update it, otherwise leave the existing one
+    // Prepare updated data
     const data = {
       title,
       description,
-      image: upload.secure_url || blog.image, // If no new image URL, retain the existing one
+      image: uploadResult?.secure_url || blog.image,
+      imagePublicId: uploadResult?.public_id || blog.imagePublicId,
     };
 
     // Update blog
@@ -112,18 +112,13 @@ const editBlogHandler = async (req, res) => {
     });
 
     if (!updatedBlog) {
-      throw createError(
-        500,
-        "There was a server-side error while updating the blog"
-      );
+      throw createError(500, "There was a server-side error while updating the blog");
     }
 
-    const baseUrl = `${req.protocol}://${req.get("host")}`;
-
-    const io = req.app.get("io"); // Access io instance from the app
+    // Emit socket event
+    const io = req.app.get("io");
     io.emit("editedBlog", updatedBlog);
 
-    // Send success response
     res.status(200).json({
       updatedBlog,
       message: "Blog updated successfully!",
@@ -134,6 +129,7 @@ const editBlogHandler = async (req, res) => {
     });
   }
 };
+
 
 const deleteBlogHandler = async (req, res) => {
   try {
