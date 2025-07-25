@@ -4,10 +4,9 @@ const User = require("../models/userModel");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const cookie = require("cookie-parser");
-
 const fs = require("fs");
 const path = require("path");
-
+const cloudinary = require('../utils/cloudinary.js')
 // User Validation check
 const uservalidator = [
   // Name validation
@@ -62,10 +61,13 @@ const addUserHandler = async (req, res) => {
     const hashedPassword = await bcrypt.hash(req.body.password, 10);
 
     // Create the user in the database
+    const upload = await cloudinary.uploader.upload(req.files[0].path);
+    console.log('upload',upload);
+    
     const user = await User.create({
       ...req.body,
       password: hashedPassword,
-      avatar: uploadedImage,
+      avatar: upload.secure_url,
     });
 
     // Remove the password field before sending the user object
@@ -133,14 +135,7 @@ const getLogin = async (req, res, next) => {
     let userWithoutPassword = await User.findById(user._id).select("-password").populate('blogs');
     const baseUrl = `${req.protocol}://${req.get('host')}`;
 
-    userWithoutPassword = {
-      ...userWithoutPassword._doc,
-      blogs: userWithoutPassword.blogs.map(blog => ({
-        ...blog._doc,
-        image: `${baseUrl}/uploads/blogThumbnail/${blog.image}`,
-      })),
-      avatar: `${baseUrl}/uploads/userAvatar/${userWithoutPassword.avatar}`
-    };
+    
 
     // Set signed cookie with token
     res.cookie(process.env.COOKIE_NAME, token, {
