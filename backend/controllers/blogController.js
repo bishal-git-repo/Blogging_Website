@@ -85,10 +85,17 @@ const editBlogHandler = async (req, res) => {
     if (blog.author.toString() !== req.user.userId) {
       throw createError(403, "You are not authorized to edit this blog");
     }
-    const upload = await cloudinary.uploader.upload(req.files[0].path);
-    if (upload.secure_url) {
-      if (blog.imagePublicId) {
-        await cloudinary.uploader.destroy(blog.imagePublicId);
+    let upload;
+
+    if (req.files && req.files[0] && req.files[0].path) {
+      // Upload new image to Cloudinary
+      upload = await cloudinary.uploader.upload(req.files[0].path);
+
+      if (upload.secure_url) {
+        // Delete old image from Cloudinary
+        if (blog.imagePublicId) {
+          await cloudinary.uploader.destroy(blog.imagePublicId);
+        }
       }
     }
 
